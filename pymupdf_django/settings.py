@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+import sys
 
+from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -37,6 +39,56 @@ SECRET_KEY = "django-insecure-9m#=5)o)%7-=!wdv2b7=_bmnp*_bj3ksvbfgd!0zs6=&@9dwrs
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# Load .env file
+dotenv_path = BASE_DIR / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
+else:
+    sys.exit(
+        "Please create a .env file in the root directory of the project based on the .env.example file."
+    )
+
+# File storage
+# https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html
+if get_env_variable("USE_AWS_S3") == "True":
+    # AWS S3 settings
+    AWS_STORAGE_BUCKET_NAME = get_env_variable("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    PUBLIC_MEDIA_LOCATION = "media"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/"
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                "custom_domain": AWS_S3_CUSTOM_DOMAIN,
+                "default_acl": "public-read",
+                "object_parameters": {"CacheControl": "max-age=86400"},
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    MEDIA_URL = "/mediafiles/"
+    MEDIA_ROOT = BASE_DIR / "mediafiles"
+
+    # Default local storage for media files
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {
+                "location": MEDIA_ROOT,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
+
 
 ALLOWED_HOSTS = []
 
