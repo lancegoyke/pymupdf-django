@@ -8,6 +8,12 @@ source .venv/bin/activate
 # Install dependencies
 python -m pip install -r requirements.txt
 
+# Create database
+python manage.py migrate
+
+# Create superuser
+python manage.py createsuperuser
+
 # Run server to check that install worked
 python manage.py runserver
 
@@ -38,15 +44,20 @@ Click "Create access key" and save the access key ID and secret access key. You 
 
 Add these keys to your .env file.
 
+Then copy your User ARN before heading to the next step.
+
 ## AWS S3 Configuration
 
 You'll need an AWS S3 bucket to store media files.
 
 Sign in to the AWS console and create a bucket at https://us-east-2.console.aws.amazon.com/s3/bucket/create.
 
-I turned off the "Block all public access" option.
+I turned off the "Block all public access" option and enabled ACLs.
 
-```shell
-# Create a .env file based on .env.example
-cp .env.example .env
-```
+You'll need to create a bucket policy to allow the IAM user to access the bucket.
+
+[Select the bucket](https://us-east-2.console.aws.amazon.com/s3/buckets) and click "Edit bucket policy".
+
+[`django-storages` recommends a bucket policy.](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#iam-policy)
+
+You'll need to place your User ARN in the policy, as well as the bucket name.
