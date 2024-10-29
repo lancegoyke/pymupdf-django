@@ -61,3 +61,11 @@ You'll need to create a bucket policy to allow the IAM user to access the bucket
 [`django-storages` recommends a bucket policy.](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#iam-policy)
 
 You'll need to place your User ARN in the policy, as well as the bucket name.
+
+## Uploading Files
+
+To upload files to the S3 bucket, you can use the Django admin interface:
+
+1. Navigate to http://127.0.0.1:8002/admin/documents/document/add/
+2. upload and file and click "Save"
+3. Inspect the link for the uploaded file and confirm it was sent to S3
